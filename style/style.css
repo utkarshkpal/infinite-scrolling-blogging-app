@@ -6,3 +6,13 @@ form a{
 {
   margin-top: :5px;
 }
+
+.list-group-item
+{
+  height:200px;
+
+}
+
+.list-group{
+  width:800px;
+}

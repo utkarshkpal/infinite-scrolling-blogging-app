@@ -1,27 +1,37 @@
-import React,{Component} from 'react';
-import {connect} from 'react-redux';
-import {fetchPosts} from '../actions/index';
-import {Link} from 'react-router';
+import React,{Component} from 'react'
+import {connect} from 'react-redux'
+import {fetchPosts} from '../actions/index'
+import {Link} from 'react-router'
+import InfiniteScroll from 'react-infinite-scroller';
 
  class PostsIndex extends Component {
 
+   constructor(props) {
+     super(props);
+   }
+
   componentWillMount() {
     this.props.fetchPosts();
+
+  }
+
+  loadFunc() {
+    console.log('loadMore');
   }
 
   renderPosts(){
 
     return this.props.posts.map((post)=>{
       return(
+        <Link to = {"posts/" + post.id}>
         <li className="list-group-item" key={post.id}>
           <span className= "pull-xs-right">{post.categories}</span>
-          <Link to = {"posts/" + post.id}>
           <strong>{post.title}</strong>
           <p>{post.preview_text}</p>
           <p>{post.timestamp}</p>
-          </Link>
         </li>
-      )
+      </Link>
+     )
     })
   }
 
@@ -38,8 +48,10 @@ import {Link} from 'react-router';
         Posts
         </h3>
         <ul className="list-group">
-          {this.renderPosts()}
+
+           {this.renderPosts()}
         </ul>
+
       </div>
     );
   }

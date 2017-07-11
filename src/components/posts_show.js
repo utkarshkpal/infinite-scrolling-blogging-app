@@ -1,25 +1,64 @@
-import React,{Component,PropTypes} from 'react';
-import {fetchPost} from "../actions/index.js";
-import {deletePost} from "../actions/index.js"
+import React,{Component,PropTypes} from 'react'
+import {fetchPost} from "../actions/index"
+import {deletePost} from "../actions/index"
+import CommentList from './comment_list'
 
 import {connect} from 'react-redux';
 import {Link} from 'react-router';
 
  class PostsShow extends Component {
 
+   constructor(props){
+     super(props);
+
+     this.state = {reachedBottom:'false'};
+     this.handleScroll = this.handleScroll.bind(this);
+   }
+
    static contextTypes = {                        //use context only in case  router
 
      router:PropTypes.object                      //router is available throughtout the application
-                                                   //but is accessible through the  parent.
+                                                  //but is accessible through the  parent.
    }
 
     componentWillMount(){
-      // console.log(this.props);
-    this.props.fetchPost(this.props.params.id);
+
+          // console.log(this.props);
+          // console.log(this.state.reachedBottom);
+          this.props.fetchPost(this.props.params.id);
+          window.addEventListener("scroll", this.handleScroll);
+
     }
 
+    componentWillUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
+  }
+
+
+    handleScroll() {
+
+     if(this.state.reachedBottom == 'false'){
+
+       const windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+       const body = document.body;
+       const html = document.documentElement;
+       const docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight,  html.scrollHeight, html.offsetHeight);
+       const windowBottom = windowHeight + window.pageYOffset;
+       if (windowBottom >= docHeight) {
+         this.setState({
+           reachedBottom:'true'
+         });
+         // console.log('reached bottom');
+       } else {
+         this.setState({
+           reachedBottom:'false'
+         });
+       }
+     }
+  }
+
     handleClickEvent(event) {
-      console.log("inside delete");
+      // console.log("inside delete");
       this.props.deletePost(this.props.params.id).then(()=>{           //our action createPosts returns a promise
      //when promise is resolved ie blog post is created navigate to index
       this.context.router.push('/');
@@ -28,25 +67,14 @@ import {Link} from 'react-router';
     }
 
 
-    renderComments(){
 
-      return this.props.post[0].comments.map((comment)=>{
-        return(
-          <li className="list-group-item" key={comment.comment_text}>
-
-            <strong>{comment.comment_text}</strong>
-
-          </li>
-        )
-      })
-    }
 
     render(){
       //  console.log(this.props);
 
      const {post} = this.props;
 
-       console.log(post);
+      //  console.log(post);
 
      if(!post){
       return <div>Loading....</div>;
@@ -59,14 +87,13 @@ import {Link} from 'react-router';
              Back
              </Link>
 
+
              <button onClick={this.handleClickEvent.bind(this)} className="btn btn-danger">Delete</button>
            </div>
           <h3>{post[0].title}</h3>
           <h3>{post[0].timestamp}</h3>
           <p>{post[0].body}</p>
-            <ul className="list-group">
-              {this.renderComments()}
-            </ul>
+          <CommentList comments = {this.props.post[0].comments} reachedBottom = {this.state.reachedBottom}/>
        </div>
      )
 
